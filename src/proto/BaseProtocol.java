@@ -16,17 +16,17 @@ public class BaseProtocol {
     	none
     }
     private ControlLock currentControlLock = ControlLock.none;
-	private HashMap<String, Byte> commandMap = new HashMap<String, Byte>();
-	private byte lastRead;
+	private HashMap<String, byte[]> commandMap = new HashMap<String, byte[]>();
+	private byte[] lastRead;
 	
 	public BaseProtocol() {
 		initCommands();
 	}
 	
 	private void initCommands() {
-		commandMap.put(	"requestControlLock", 	(byte) 0x00);
-		commandMap.put(	"acceptControlLock", 	(byte) 0x01);
-		commandMap.put(	"denyControlLock", 		(byte) 0x02);
+		commandMap.put(	"requestControlLock", 	new byte[] {(byte) 0x00 });
+		commandMap.put(	"acceptControlLock", 	new byte[] {(byte) 0x01 });
+		commandMap.put(	"denyControlLock", 		new byte[] {(byte) 0x02 });
 	}
 	
 	public synchronized boolean requestControlLock(UtilitySocket socket) {
@@ -44,14 +44,14 @@ public class BaseProtocol {
 	}
 	
 	private void send(UtilitySocket socket, String command) throws IOException {
-		socket.getOutputStream().writeByte(commandMap.get(command));
+		socket.write(commandMap.get(command));
 	}
 	
 	private void read(UtilitySocket socket) throws IOException {
-		lastRead = socket.getInputStream().readByte();
+		socket.read(lastRead);
 	}
 
-	private byte com(String command) {
+	private byte[] com(String command) {
 		return commandMap.get(command);
 	}
 }

@@ -20,6 +20,9 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.net.ssl.SSLSocket;
 
 
@@ -27,18 +30,16 @@ import javax.net.ssl.SSLSocket;
 //import org.apache.commons.logging.*;
 
 public class UtilitySocket extends Socket implements Serializable {
+	
+    protected long bytesSent = 0;
+    protected long bytesReceived = 0;
     
     private static final long serialVersionUID = -7693049193453297145L;
     private long connectedAtMillis;
     private long disconnectedAtMillis;
     private UUID uniqueID;
-    private UtilitySocket socket = null;
-    private long bytesSent = 0;
-    private long bytesReceived = 0;
-    
-    
-    private DataInputStream inputStream = null;
-    private DataOutputStream outputStream = null;
+    private InputStream inputStream = null;
+    private OutputStream outputStream = null;
         
 	public UtilitySocket(String host, int port) throws UnknownHostException, IOException {
     	super(host,port);
@@ -51,42 +52,42 @@ public class UtilitySocket extends Socket implements Serializable {
     }
     
     private synchronized void initStreams() throws IOException {    	
-        inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-        outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        inputStream = new DataInputStream(new BufferedInputStream(super.getInputStream()));
+        outputStream = new DataOutputStream(new BufferedOutputStream(super.getOutputStream()));
     }
         
     public synchronized UUID getUniqueID() {
         return uniqueID;
     }
      
-	public synchronized DataInputStream getInputStream() {
+	public synchronized InputStream getInputStream() {
 		return inputStream;
 	}
 
-	public synchronized DataOutputStream getOutputStream() {
+	public synchronized OutputStream getOutputStream() {
 		return outputStream;
 	}
 	
-	public synchronized void write(byte[] data) throws IOException {
-		outputStream.write(data);
+	public synchronized void read(byte[] buffer) throws IOException {
+		inputStream.read(buffer);
+		bytesReceived += buffer.length;
+	}
+	
+	public synchronized void write(byte[] buffer) throws IOException {
+		outputStream.write(buffer);
 		outputStream.flush();
-		bytesSent += data.length;
+		bytesSent += buffer.length;
     }  
 	
 	public synchronized void disconnect() throws IOException {
 		inputStream.close();
 		outputStream.close();
-		socket.close();
+		super.close();
 		
 		this.disconnectedAtMillis = System.currentTimeMillis();
 		bytesSent = 0;
 	}
-		
-	/*
-    public synchronized boolean isSSLConnection() {
-    	return this instanceof SSLSocket;
-    }
-    */
+	
     public long getTimeConnectedMillis() {
         return connectedAtMillis;
     }
@@ -104,7 +105,7 @@ public class UtilitySocket extends Socket implements Serializable {
     }
         
     public long getElapsedTimeConnectedMillis() {
-    	if(socket.isConnected()) {
+    	if(super.isConnected()) {
     		long millisConnected = System.currentTimeMillis() - connectedAtMillis;
             return millisConnected;
     	} else {
@@ -120,6 +121,5 @@ public class UtilitySocket extends Socket implements Serializable {
 	public long getBytesReceived() {
 		return bytesReceived;
 	}
-    
-    
+        
 }
