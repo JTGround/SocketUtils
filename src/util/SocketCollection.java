@@ -18,18 +18,23 @@ import connection.UtilitySocket;
 public class SocketCollection {
 
 	private HashMap<UUID, Socket> connections = new HashMap<UUID, Socket>();
+	private HashMap<UUID, UtilitySocket> utilitySockets = new HashMap<UUID, UtilitySocket>();
 	
 	public SocketCollection() {		
 	}
 	
 	public void add(Socket connection) {
-		if(connection instanceof UtilitySocket) {
-			UtilitySocket utilSocket = (UtilitySocket) connection;
-			connections.put(utilSocket.getUniqueID(), utilSocket);
-		} else {
-			connections.put(UUID.randomUUID(), connection);
-		}
-			
+		connections.put(UUID.randomUUID(), connection);
+	//	if(connection instanceof UtilitySocket) {
+	//		UtilitySocket utilSocket = (UtilitySocket) connection;
+	//		connections.put(utilSocket.getUniqueID(), utilSocket);
+	//	} else {
+	//		connections.put(UUID.randomUUID(), connection);
+	//	}			
+	}
+	
+	public void add(UtilitySocket connection) {
+		utilitySockets.put(connection.getUniqueID(), connection);
 	}
 	
 	public Socket get(UUID id) {

@@ -29,7 +29,7 @@ public class ConnectionListener extends Thread {
 		}
         while (serverSocket.isBound()) {
             try {
-                UtilitySocket clientSocket = serverSocket.accept();
+                UtilitySocket clientSocket = serverSocket.acceptUtilitySocket();
                 eventHandler.connectionAccepted(new ConnectionListenerEvent(clientSocket));
             }
             catch (IOException ex) {

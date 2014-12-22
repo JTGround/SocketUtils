@@ -48,7 +48,7 @@ public class BaseProtocol {
 	}
 	
 	private void read(UtilitySocket socket) throws IOException {
-		socket.read(lastRead);
+		//socket.read(lastRead);
 	}
 
 	private byte[] com(String command) {

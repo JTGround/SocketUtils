@@ -14,9 +14,11 @@ import java.io.DataOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -29,7 +31,7 @@ import javax.net.ssl.SSLSocket;
 
 //import org.apache.commons.logging.*;
 
-public class UtilitySocket extends Socket implements Serializable {
+public class UtilitySocket implements Serializable {
 	
     protected long bytesSent = 0;
     protected long bytesReceived = 0;
@@ -40,20 +42,32 @@ public class UtilitySocket extends Socket implements Serializable {
     private UUID uniqueID;
     private InputStream inputStream = null;
     private OutputStream outputStream = null;
+    private Socket socket = null;
         
 	public UtilitySocket(String host, int port) throws UnknownHostException, IOException {
-    	super(host,port);
     	
     	uniqueID = UUID.randomUUID();    	
     	this.connectedAtMillis = System.currentTimeMillis();
     	this.disconnectedAtMillis = 0;
+    	socket = new Socket(host,port);
     	
     	initStreams();
+    	this.listenData();
     }
+	
+	public UtilitySocket(Socket socket) throws IOException {
+		uniqueID = UUID.randomUUID();    	
+    	this.connectedAtMillis = System.currentTimeMillis();
+    	this.disconnectedAtMillis = 0;
+    	this.socket = socket;
+    	
+    	initStreams();
+    	this.listenData();
+	}
     
     private synchronized void initStreams() throws IOException {    	
-        inputStream = new DataInputStream(new BufferedInputStream(super.getInputStream()));
-        outputStream = new DataOutputStream(new BufferedOutputStream(super.getOutputStream()));
+        inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+        outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
     }
         
     public synchronized UUID getUniqueID() {
@@ -68,11 +82,6 @@ public class UtilitySocket extends Socket implements Serializable {
 		return outputStream;
 	}
 	
-	public synchronized void read(byte[] buffer) throws IOException {
-		inputStream.read(buffer);
-		bytesReceived += buffer.length;
-	}
-	
 	public synchronized void write(byte[] buffer) throws IOException {
 		outputStream.write(buffer);
 		outputStream.flush();
@@ -82,7 +91,7 @@ public class UtilitySocket extends Socket implements Serializable {
 	public synchronized void disconnect() throws IOException {
 		inputStream.close();
 		outputStream.close();
-		super.close();
+		socket.close();
 		
 		this.disconnectedAtMillis = System.currentTimeMillis();
 		bytesSent = 0;
@@ -105,7 +114,7 @@ public class UtilitySocket extends Socket implements Serializable {
     }
         
     public long getElapsedTimeConnectedMillis() {
-    	if(super.isConnected()) {
+    	if(socket.isConnected()) {
     		long millisConnected = System.currentTimeMillis() - connectedAtMillis;
             return millisConnected;
     	} else {
@@ -120,6 +129,20 @@ public class UtilitySocket extends Socket implements Serializable {
 
 	public long getBytesReceived() {
 		return bytesReceived;
+	}
+	
+	private void listenData() throws IOException {
+		byte[] buffer = new byte[1024];
+		while(true) {
+			int size = inputStream.read(buffer);
+			parseBuffer(Arrays.copyOf(buffer, size));
+			bytesReceived += size;
+			
+		}
+	}
+	
+	private void parseBuffer(byte[] buffer) throws UnsupportedEncodingException {
+		System.out.println(new String(buffer,"UTF-8"));
 	}
         
 }

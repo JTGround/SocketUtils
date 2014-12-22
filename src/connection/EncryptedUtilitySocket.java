@@ -39,12 +39,6 @@ public class EncryptedUtilitySocket extends UtilitySocket {
 	}
 
 	@Override
-	public synchronized void read(byte[] buffer) throws IOException {
-		inputStream.read(buffer);
-		this.bytesReceived += buffer.length;
-	}
-
-	@Override
 	public synchronized void write(byte[] buffer) throws IOException {
 		outputStream.write(buffer);
 		this.bytesSent += buffer.length;
