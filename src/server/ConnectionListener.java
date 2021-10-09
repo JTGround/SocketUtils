@@ -1,12 +1,16 @@
+package server;
 
-package connection;
+import connection.ClientConnection;
+import server.events.ConnectionListenerClientEvent;
+import server.events.ConnectionListenerStateEvent;
 
 import java.io.IOException;
-
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class ConnectionListener extends Thread {
 
-    private UtilityServerSocket serverSocket;
+    private ServerSocket serverSocket;
     private final int listeningPort;
     private ConnectionEventListener eventHandler;
         
@@ -14,23 +18,24 @@ public class ConnectionListener extends Thread {
     	this.listeningPort = listeningPort;
     	this.eventHandler = eventHandler;
     }
-    
+
     public int getListeningPort() {
-    	return listeningPort;
+        return listeningPort;
     }
-    
+
+    @Override
     public void run() {
     	try {
-			serverSocket = new UtilityServerSocket(listeningPort);
-			eventHandler.listenerStarted(new ConnectionListenerEvent(serverSocket));
+			serverSocket = new ServerSocket(listeningPort);
+			eventHandler.listenerStarted(new ConnectionListenerStateEvent(serverSocket));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         while (serverSocket.isBound()) {
             try {
-                UtilitySocket clientSocket = serverSocket.acceptUtilitySocket();
-                eventHandler.connectionAccepted(new ConnectionListenerEvent(clientSocket));
+                Socket clientSocket = serverSocket.accept();
+                ClientConnection clientConnection = new ClientConnection(clientSocket);
+                eventHandler.connectionAccepted(new ConnectionListenerClientEvent(clientConnection));
             }
             catch (IOException ex) {
                 ex.printStackTrace();
@@ -44,7 +49,7 @@ public class ConnectionListener extends Thread {
         }
         try { 
         	serverSocket.close();
-        	eventHandler.listenerClosed(new ConnectionListenerEvent(serverSocket));
+        	eventHandler.listenerClosed(new ConnectionListenerStateEvent(serverSocket));
         }
         catch (IOException ex) {
                 ex.printStackTrace();
@@ -54,13 +59,11 @@ public class ConnectionListener extends Thread {
     @Override
     public synchronized void interrupt() {
     	super.interrupt();
-    	eventHandler.listenerInterrupted(new ConnectionListenerEvent(serverSocket));
+    	eventHandler.listenerInterrupted(new ConnectionListenerStateEvent(serverSocket));
     }
     
     public synchronized void close() throws IOException {
         serverSocket.close();
-        eventHandler.listenerClosed(new ConnectionListenerEvent(serverSocket));
+        eventHandler.listenerClosed(new ConnectionListenerStateEvent(serverSocket));
     }
-
-                
 }

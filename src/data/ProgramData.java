@@ -7,7 +7,7 @@
 
 package data;
 import java.util.Hashtable;
-import server.ServerProperties;
+import server.ServerInstanceProperties;
 
 import java.io.*;
 
@@ -23,20 +23,20 @@ public class ProgramData {
      * Method for reading Server Instance List from file.
      * @return
      */
-    public Hashtable<String,ServerProperties> loadInstanceList() {
-        Hashtable<String,ServerProperties> instanceList = null;
+    public Hashtable<String, ServerInstanceProperties> loadInstanceList() {
+        Hashtable<String, ServerInstanceProperties> instanceList = null;
         File f = new File("instancelist.dat");
         if(f.exists()) {
             try {
                 ObjectInputStream connectionStream = new ObjectInputStream(new FileInputStream(f));
-                instanceList = (Hashtable<String,ServerProperties>)connectionStream.readObject();
+                instanceList = (Hashtable<String, ServerInstanceProperties>)connectionStream.readObject();
                 connectionStream.close();
             }
             catch(FileNotFoundException fnfex) { JOptionPane.showMessageDialog(null,"File that contains server instance list was not found." + fnfex.getMessage()); }
             catch(IOException ioex) { JOptionPane.showMessageDialog(null,"IO Exception. " + ioex.getMessage()); }
             catch(ClassNotFoundException cnfex) { JOptionPane.showMessageDialog(null,"Class not found." + cnfex.getMessage()); }
         }
-        else instanceList = new Hashtable<String,ServerProperties>();
+        else instanceList = new Hashtable<String, ServerInstanceProperties>();
         return instanceList;
     }
     
@@ -44,7 +44,7 @@ public class ProgramData {
      * Method for writing Server Instance List to file.
      * @param instanceList
      */
-    public void writeInstanceList(Hashtable<String,ServerProperties> instanceList) {
+    public void writeInstanceList(Hashtable<String, ServerInstanceProperties> instanceList) {
         String filename = "instancelist.dat";
         try {
             ObjectOutputStream outstream = new ObjectOutputStream(new FileOutputStream(filename));
