@@ -3,12 +3,12 @@ package server.events;
 import java.net.ServerSocket;
 import java.nio.channels.ServerSocketChannel;
 
-public class StreamConnectionListenerStateEvent {
+public class ConnectionListenerStateEvent {
 
     private ServerSocket serverSocket;
 
 
-    public StreamConnectionListenerStateEvent(ServerSocket serverSocket) {
+    public ConnectionListenerStateEvent(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
     }
 

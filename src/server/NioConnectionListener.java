@@ -2,7 +2,7 @@ package server;
 
 import connection.NioClientConnection;
 import server.events.ConnectionListenerClientEvent;
-import server.events.NioConnectionListenerStateEvent;
+import server.events.ConnectionListenerStateEvent;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,11 +13,14 @@ public class NioConnectionListener extends Thread {
 
     private ServerSocketChannel serverSocket;
     private final int listeningPort;
-    private NioConnectionEventListener eventHandler;
+    private ConnectionEventListener eventHandler;
+    private ConnectionListenerStateEventListener listenerStateEventHandler;
         
-    public NioConnectionListener(int listeningPort, NioConnectionEventListener eventHandler) {
+    public NioConnectionListener(int listeningPort, ConnectionEventListener eventHandler,
+                                 ConnectionListenerStateEventListener listenerStateEventHandler) {
     	this.listeningPort = listeningPort;
     	this.eventHandler = eventHandler;
+        this.listenerStateEventHandler = listenerStateEventHandler;
     }
 
     public int getListeningPort() {
@@ -30,7 +33,7 @@ public class NioConnectionListener extends Thread {
             try {
                 serverSocket = ServerSocketChannel.open();
                 serverSocket.bind(new InetSocketAddress(listeningPort));
-                eventHandler.listenerStarted(new NioConnectionListenerStateEvent(serverSocket));
+                listenerStateEventHandler.listenerStarted(new ConnectionListenerStateEvent(serverSocket.socket()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -52,7 +55,7 @@ public class NioConnectionListener extends Thread {
             }
             try {
                 serverSocket.close();
-                eventHandler.listenerClosed(new NioConnectionListenerStateEvent(serverSocket));
+                listenerStateEventHandler.listenerClosed(new ConnectionListenerStateEvent(serverSocket.socket()));
             }
             catch (IOException ex) {
                 ex.printStackTrace();
@@ -64,11 +67,11 @@ public class NioConnectionListener extends Thread {
     @Override
     public synchronized void interrupt() {
     	super.interrupt();
-    	eventHandler.listenerInterrupted(new NioConnectionListenerStateEvent(serverSocket));
+        listenerStateEventHandler.listenerInterrupted(new ConnectionListenerStateEvent(serverSocket.socket()));
     }
     
     public synchronized void close() throws IOException {
         serverSocket.close();
-        eventHandler.listenerClosed(new NioConnectionListenerStateEvent(serverSocket));
+        listenerStateEventHandler.listenerClosed(new ConnectionListenerStateEvent(serverSocket.socket()));
     }
 }

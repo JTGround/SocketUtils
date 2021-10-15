@@ -5,30 +5,32 @@ import java.util.UUID;
 
 import connection.ClientConnection;
 import server.events.ConnectionListenerClientEvent;
-import server.events.NioConnectionListenerStateEvent;
+import server.events.ConnectionListenerStateEvent;
 import util.ClientConnectionHashMap;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 
-public class ConnectionManager implements NioConnectionEventListener {
+public class ConnectionManager implements ConnectionEventListener, ConnectionListenerStateEventListener {
     
     private ClientConnectionHashMap connections = new ClientConnectionHashMap();
 	private final ConnectionManagerProperties connectionManagerProperties;
-	private NioConnectionListener listener;
+	private NioConnectionListener nioConnectionListener;
+	private StreamConnectionListener streamConnectionListener;
 
     public ConnectionManager(ConnectionManagerProperties connectionManagerProperties) {
 		this.connectionManagerProperties = connectionManagerProperties;
 
-		this.listener = new NioConnectionListener(connectionManagerProperties.getListenerPort(), this);
+		this.nioConnectionListener = new NioConnectionListener(connectionManagerProperties.getListenerPort(), this, this);
+		this.streamConnectionListener = new StreamConnectionListener(connectionManagerProperties.getListenerPort(), this, this);
 		//this.listener.setDaemon(true);
     }
 
 	public synchronized void startListener() {
-		this.listener.start();
+		this.nioConnectionListener.start();
 	}
 
 	public synchronized void interruptListener() {
-		this.listener.interrupt();
+		this.nioConnectionListener.interrupt();
 	}
     
     public synchronized void disconnectClient(UUID id) throws IOException {
@@ -59,17 +61,17 @@ public class ConnectionManager implements NioConnectionEventListener {
 	}
 
 	@Override
-	public synchronized void listenerStarted(NioConnectionListenerStateEvent evt) {
+	public synchronized void listenerStarted(ConnectionListenerStateEvent evt) {
 		System.out.println("listener started");
 	}
 
 	@Override
-	public synchronized void listenerInterrupted(NioConnectionListenerStateEvent evt) {
+	public synchronized void listenerInterrupted(ConnectionListenerStateEvent evt) {
 			System.out.println("listener interrupted");
 	}
 
 	@Override
-	public synchronized void listenerClosed(NioConnectionListenerStateEvent evt) {
+	public synchronized void listenerClosed(ConnectionListenerStateEvent evt) {
 		System.out.println("listener closed");
 	}
 

@@ -2,7 +2,7 @@ package server;
 
 import connection.StreamClientConnection;
 import server.events.ConnectionListenerClientEvent;
-import server.events.StreamConnectionListenerStateEvent;
+import server.events.ConnectionListenerStateEvent;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,11 +13,14 @@ public class StreamConnectionListener extends Thread {
 
     private ServerSocket serverSocket;
     private final int listeningPort;
-    private StreamConnectionEventListener eventHandler;
+    private ConnectionEventListener eventHandler;
+    private ConnectionListenerStateEventListener listenerStateEventHandler;
 
-    public StreamConnectionListener(int listeningPort, StreamConnectionEventListener eventHandler) {
+    public StreamConnectionListener(int listeningPort, ConnectionEventListener eventHandler,
+                                    ConnectionListenerStateEventListener listenerStateEventHandler) {
         this.listeningPort = listeningPort;
         this.eventHandler = eventHandler;
+        this.listenerStateEventHandler = listenerStateEventHandler;
     }
 
     public int getListeningPort() {
@@ -30,7 +33,7 @@ public class StreamConnectionListener extends Thread {
             try {
                 serverSocket = new ServerSocket(4444);
                 serverSocket.bind(new InetSocketAddress(listeningPort));
-                eventHandler.listenerStarted(new StreamConnectionListenerStateEvent(serverSocket));
+                listenerStateEventHandler.listenerStarted(new ConnectionListenerStateEvent(serverSocket));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -52,7 +55,7 @@ public class StreamConnectionListener extends Thread {
             }
             try {
                 serverSocket.close();
-                eventHandler.listenerClosed(new StreamConnectionListenerStateEvent(serverSocket));
+                listenerStateEventHandler.listenerClosed(new ConnectionListenerStateEvent(serverSocket));
             }
             catch (IOException ex) {
                 ex.printStackTrace();
@@ -64,11 +67,11 @@ public class StreamConnectionListener extends Thread {
     @Override
     public synchronized void interrupt() {
         super.interrupt();
-        eventHandler.listenerInterrupted(new StreamConnectionListenerStateEvent(serverSocket));
+        listenerStateEventHandler.listenerInterrupted(new ConnectionListenerStateEvent(serverSocket));
     }
 
     public synchronized void close() throws IOException {
         serverSocket.close();
-        eventHandler.listenerClosed(new StreamConnectionListenerStateEvent(serverSocket));
+        listenerStateEventHandler.listenerClosed(new ConnectionListenerStateEvent(serverSocket));
     }
 }
