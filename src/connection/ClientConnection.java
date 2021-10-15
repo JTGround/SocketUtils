@@ -1,27 +1,34 @@
 package connection;
 
+import util.InputStreamEventListener;
+import util.InputStreamListener;
+import util.events.InputStreamDataReceivedEvent;
+
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class ClientConnection {
+public abstract class ClientConnection implements InputStreamEventListener {
 
-    private static final long serialVersionUID = -7693049193453297145L;
+    protected final UUID uniqueID = UUID.randomUUID();
+    protected ConnectionStatistics connectionStatistics = new ConnectionStatistics();
+    protected Socket socket = null;
 
-    private final UUID uniqueID = UUID.randomUUID();
-    private InputStream inputStream = null;
-    private OutputStream outputStream = null;
-    private Socket socket = null;
-    private ConnectionStatistics connectionStatistics = new ConnectionStatistics();
-
-
-    public ClientConnection(Socket socket) throws IOException  {
+    public ClientConnection(Socket socket) {
         this.socket = socket;
+    }
 
-        initStreams();
-        //listenData();
+    public ClientConnection(String host, int port) throws IOException {
+        this.socket = new Socket(host, port);
+    }
+
+    public UUID getUniqueID() {
+        return uniqueID;
     }
 
     public SocketAddress getLocalSocketAddress() {
@@ -32,57 +39,12 @@ public class ClientConnection {
         return socket.getRemoteSocketAddress();
     }
 
-    public synchronized UUID getUniqueID() {
-        return uniqueID;
-    }
-
-    public synchronized InputStream getInputStream() {
-        return inputStream;
-    }
-
-    public synchronized OutputStream getOutputStream() {
-        return outputStream;
-    }
-
-    public synchronized void write(byte[] buffer) throws IOException {
-        outputStream.write(buffer);
-        outputStream.flush();
-
-        connectionStatistics.incrementBytesSent(buffer.length);
-    }
-
-    public synchronized void disconnect() throws IOException {
-        inputStream.close();
-        outputStream.close();
-        socket.close();
-
-        connectionStatistics.setDisconnected();
-    }
-
     public ConnectionStatistics getStatistics() {
         return connectionStatistics;
     }
 
-    public boolean getIsConnected() {
-        return socket.isConnected();
-    }
+    public abstract void disconnect() throws IOException;
 
-    private void listenData() throws IOException {
-        byte[] buffer = new byte[1024];
-        while(true) {
-            int size = inputStream.read(buffer);
-            parseBuffer(Arrays.copyOf(buffer, size));
+    public abstract boolean getIsConnected();
 
-            connectionStatistics.incrementBytesReceived(size);
-        }
-    }
-
-    private void parseBuffer(byte[] buffer) throws UnsupportedEncodingException {
-        System.out.println(new String(buffer,"UTF-8"));
-    }
-
-    private synchronized void initStreams() throws IOException {
-        inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-        outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-    }
 }

@@ -5,29 +5,29 @@ import java.util.UUID;
 
 import connection.ClientConnection;
 import server.events.ConnectionListenerClientEvent;
-import server.events.ConnectionListenerStateEvent;
+import server.events.NioConnectionListenerStateEvent;
 import util.ClientConnectionHashMap;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 
-public class ConnectionManager implements ConnectionEventListener {
+public class ConnectionManager implements NioConnectionEventListener {
     
     private ClientConnectionHashMap connections = new ClientConnectionHashMap();
 	private final ConnectionManagerProperties connectionManagerProperties;
-	private ConnectionListener listener;
+	private NioConnectionListener listener;
 
     public ConnectionManager(ConnectionManagerProperties connectionManagerProperties) {
 		this.connectionManagerProperties = connectionManagerProperties;
 
-		this.listener = new ConnectionListener(connectionManagerProperties.getListenerPort(), this);
+		this.listener = new NioConnectionListener(connectionManagerProperties.getListenerPort(), this);
 		//this.listener.setDaemon(true);
     }
 
-	public void startListener() {
+	public synchronized void startListener() {
 		this.listener.start();
 	}
 
-	public void interruptListener() {
+	public synchronized void interruptListener() {
 		this.listener.interrupt();
 	}
     
@@ -49,32 +49,32 @@ public class ConnectionManager implements ConnectionEventListener {
     }
 
 	@Override
-	public void connectionAccepted(ConnectionListenerClientEvent evt) {
-		System.out.println("accepted: " + evt.getClientConnection().getRemoteSocketAddress());
+	public synchronized void connectionAccepted(ConnectionListenerClientEvent evt) {
+			System.out.println("accepted: " + evt.getClientConnection().getRemoteSocketAddress());
 	}
 
 	@Override
-	public void connectionRemoved(ConnectionListenerClientEvent evt) {
+	public synchronized void connectionRemoved(ConnectionListenerClientEvent evt) {
 
 	}
 
 	@Override
-	public void listenerStarted(ConnectionListenerStateEvent evt) {
+	public synchronized void listenerStarted(NioConnectionListenerStateEvent evt) {
 		System.out.println("listener started");
 	}
 
 	@Override
-	public void listenerInterrupted(ConnectionListenerStateEvent evt) {
-
+	public synchronized void listenerInterrupted(NioConnectionListenerStateEvent evt) {
+			System.out.println("listener interrupted");
 	}
 
 	@Override
-	public void listenerClosed(ConnectionListenerStateEvent evt) {
-
+	public synchronized void listenerClosed(NioConnectionListenerStateEvent evt) {
+		System.out.println("listener closed");
 	}
 
 	@Override
-	public void handshakeCompleted(HandshakeCompletedEvent evt) {
+	public synchronized void handshakeCompleted(HandshakeCompletedEvent evt) {
 
 	}
 }
