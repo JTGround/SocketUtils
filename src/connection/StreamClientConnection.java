@@ -26,6 +26,7 @@ public class StreamClientConnection extends ClientConnection {
 
         this.streamListener = new InputStreamListener(inputStream, this);
         this.streamListener.start();
+        System.out.println("stream listener for " + this.getUniqueID() + " has started");
     }
 
     public StreamClientConnection(String host, int port) throws IOException {
@@ -34,6 +35,7 @@ public class StreamClientConnection extends ClientConnection {
 
         this.streamListener = new InputStreamListener(inputStream, this);
         this.streamListener.start();
+        System.out.println("stream listener for " + this.getUniqueID() + " has started");
     }
 
     public void write(byte[] buffer) throws IOException {

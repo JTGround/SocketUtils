@@ -15,4 +15,5 @@ public class ConnectionListenerStateEvent {
     public ServerSocket getServerSocket() {
         return this.serverSocket;
     }
+
 }

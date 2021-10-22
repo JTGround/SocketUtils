@@ -1,16 +1,9 @@
 package connection;
 
 import util.InputStreamEventListener;
-import util.InputStreamListener;
-import util.events.InputStreamDataReceivedEvent;
-
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.UUID;
 
 public abstract class ClientConnection implements InputStreamEventListener {

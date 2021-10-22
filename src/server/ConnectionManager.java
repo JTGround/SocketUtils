@@ -52,27 +52,27 @@ public class ConnectionManager implements ConnectionEventListener, ConnectionLis
 
 	@Override
 	public synchronized void connectionAccepted(ConnectionListenerClientEvent evt) {
-			System.out.println("accepted: " + evt.getClientConnection().getRemoteSocketAddress());
+		System.out.println("connection accepted: " + evt.getClientConnection().getRemoteSocketAddress());
 	}
 
 	@Override
 	public synchronized void connectionRemoved(ConnectionListenerClientEvent evt) {
-
+		System.out.println("connection removed: " + evt.getClientConnection().getRemoteSocketAddress());
 	}
 
 	@Override
 	public synchronized void listenerStarted(ConnectionListenerStateEvent evt) {
-		System.out.println("listener started");
+		System.out.println("listener started: " + evt.getServerSocket().getLocalSocketAddress().toString());
 	}
 
 	@Override
 	public synchronized void listenerInterrupted(ConnectionListenerStateEvent evt) {
-			System.out.println("listener interrupted");
+			System.out.println("listener interrupted " + evt.getServerSocket().getInetAddress().toString());
 	}
 
 	@Override
 	public synchronized void listenerClosed(ConnectionListenerStateEvent evt) {
-		System.out.println("listener closed");
+		System.out.println("listener closed " + evt.getServerSocket().getInetAddress().toString());
 	}
 
 	@Override
