@@ -1,36 +1,40 @@
 package server;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import connection.ClientConnection;
 import server.events.ConnectionListenerClientEvent;
 import server.events.ConnectionListenerStateEvent;
 import util.ClientConnectionHashMap;
-
 import javax.net.ssl.HandshakeCompletedEvent;
 
 public class ConnectionManager implements ConnectionEventListener, ConnectionListenerStateEventListener {
     
-    private ClientConnectionHashMap connections = new ClientConnectionHashMap();
+    private final ClientConnectionHashMap connections = new ClientConnectionHashMap();
 	private final ConnectionManagerProperties connectionManagerProperties;
-	private NioConnectionListener nioConnectionListener;
-	private StreamConnectionListener streamConnectionListener;
+	//private NioConnectionListener nioConnectionListener;
+	private final StreamConnectionListener streamConnectionListener;
+	Logger logger = Logger.getLogger("SocketUtils");
 
     public ConnectionManager(ConnectionManagerProperties connectionManagerProperties) {
 		this.connectionManagerProperties = connectionManagerProperties;
 
-		this.nioConnectionListener = new NioConnectionListener(connectionManagerProperties.getListenerPort(), this, this);
+		//this.nioConnectionListener = new NioConnectionListener(connectionManagerProperties.getListenerPort(), this, this);
 		this.streamConnectionListener = new StreamConnectionListener(connectionManagerProperties.getListenerPort(), this, this);
 		//this.listener.setDaemon(true);
     }
 
 	public synchronized void startListener() {
-		this.nioConnectionListener.start();
+		//this.nioConnectionListener.start();
+		this.streamConnectionListener.start();
 	}
 
 	public synchronized void interruptListener() {
-		this.nioConnectionListener.interrupt();
+		//this.nioConnectionListener.interrupt();
+		this.streamConnectionListener.interrupt();
 	}
     
     public synchronized void disconnectClient(UUID id) throws IOException {
@@ -42,37 +46,35 @@ public class ConnectionManager implements ConnectionEventListener, ConnectionLis
     }
     
     public synchronized void disconnectAll() throws IOException {
-    	var it = connections.values().iterator();
-    	while(it.hasNext()) {
-			ClientConnection connection = it.next();
-			connection.disconnect();
-    	}
+        for (ClientConnection connection : connections.values()) {
+            connection.disconnect();
+        }
     	connections.clear();
     }
 
 	@Override
 	public synchronized void connectionAccepted(ConnectionListenerClientEvent evt) {
-		System.out.println("connection accepted: " + evt.getClientConnection().getRemoteSocketAddress());
+		logger.info("connection accepted: " + evt.getClientConnection().getRemoteSocketAddress());
 	}
 
 	@Override
 	public synchronized void connectionRemoved(ConnectionListenerClientEvent evt) {
-		System.out.println("connection removed: " + evt.getClientConnection().getRemoteSocketAddress());
+		logger.info("connection removed: " + evt.getClientConnection().getRemoteSocketAddress());
 	}
 
 	@Override
 	public synchronized void listenerStarted(ConnectionListenerStateEvent evt) {
-		System.out.println("listener started: " + evt.getServerSocket().getLocalSocketAddress().toString());
+		logger.info("listener started: listening on port " + evt.getPort());
 	}
 
 	@Override
 	public synchronized void listenerInterrupted(ConnectionListenerStateEvent evt) {
-			System.out.println("listener interrupted " + evt.getServerSocket().getInetAddress().toString());
+		logger.info("listener interrupted ");
 	}
 
 	@Override
 	public synchronized void listenerClosed(ConnectionListenerStateEvent evt) {
-		System.out.println("listener closed " + evt.getServerSocket().getInetAddress().toString());
+		logger.info("listener closed ");
 	}
 
 	@Override

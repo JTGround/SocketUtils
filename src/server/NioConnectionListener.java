@@ -33,7 +33,7 @@ public class NioConnectionListener extends Thread {
             try {
                 serverSocket = ServerSocketChannel.open();
                 serverSocket.bind(new InetSocketAddress(listeningPort));
-                listenerStateEventHandler.listenerStarted(new ConnectionListenerStateEvent(serverSocket.socket()));
+                listenerStateEventHandler.listenerStarted(new ConnectionListenerStateEvent(this.listeningPort));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -55,7 +55,7 @@ public class NioConnectionListener extends Thread {
             }
             try {
                 serverSocket.close();
-                listenerStateEventHandler.listenerClosed(new ConnectionListenerStateEvent(serverSocket.socket()));
+                listenerStateEventHandler.listenerClosed(new ConnectionListenerStateEvent(this.listeningPort));
             }
             catch (IOException ex) {
                 ex.printStackTrace();
@@ -67,11 +67,11 @@ public class NioConnectionListener extends Thread {
     @Override
     public synchronized void interrupt() {
     	super.interrupt();
-        listenerStateEventHandler.listenerInterrupted(new ConnectionListenerStateEvent(serverSocket.socket()));
+        listenerStateEventHandler.listenerInterrupted(new ConnectionListenerStateEvent(this.listeningPort));
     }
     
     public synchronized void close() throws IOException {
         serverSocket.close();
-        listenerStateEventHandler.listenerClosed(new ConnectionListenerStateEvent(serverSocket.socket()));
+        listenerStateEventHandler.listenerClosed(new ConnectionListenerStateEvent(this.listeningPort));
     }
 }

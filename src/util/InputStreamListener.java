@@ -7,8 +7,8 @@ import java.io.InputStream;
 
 public class InputStreamListener extends Thread {
 
-    private InputStream stream;
-    private InputStreamEventListener eventListener;
+    private final InputStream stream;
+    private final InputStreamEventListener eventListener;
 
     public InputStreamListener(InputStream stream, InputStreamEventListener eventListener) {
         this.stream = stream;

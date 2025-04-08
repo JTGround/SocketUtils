@@ -1,10 +1,14 @@
 package connection;
 
 import util.InputStreamEventListener;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+
 
 public abstract class ClientConnection implements InputStreamEventListener {
 

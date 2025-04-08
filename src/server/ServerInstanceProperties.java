@@ -1,10 +1,12 @@
 package server;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class ServerInstanceProperties implements Serializable {
     
-	private static final long serialVersionUID = -1387080975465018173L;
+	@Serial
+    private static final long serialVersionUID = -1387080975465018173L;
     private int portNumber;
     private int maxNumberConnections;
     

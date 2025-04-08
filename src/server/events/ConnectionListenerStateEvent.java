@@ -1,19 +1,15 @@
 package server.events;
 
-import java.net.ServerSocket;
-import java.nio.channels.ServerSocketChannel;
-
 public class ConnectionListenerStateEvent {
 
-    private ServerSocket serverSocket;
+    private final int port;
 
+    public ConnectionListenerStateEvent(int port) {
 
-    public ConnectionListenerStateEvent(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
+        this.port = port;
     }
 
-    public ServerSocket getServerSocket() {
-        return this.serverSocket;
+    public int getPort() {
+        return port;
     }
-
 }
